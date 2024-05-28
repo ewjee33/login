@@ -1,11 +1,19 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsDate , IsString } from 'class-validator';
 
 export class CreateUserDao {
   @IsString()
   @IsNotEmpty()
-  email: string;
+  userId: string;
 
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsDate()
+  @IsNotEmpty()
+  createdAt: Date;
+
+  @IsDate()
+  @IsNotEmpty()
+  signedIn: Date;
 }
