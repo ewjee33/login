@@ -8,8 +8,9 @@ import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class UserRepository {
-  @InjectModel('Login' , 'user')
-  private readonly userModel: Model<UserDocument>,
+  constructor(
+    @InjectModel('User') private readonly userModel: Model<UserDocument>,
+  ) {}
   async createUser(createUserDto: CreateUserDto , session : ClientSession ): Promise<UserDocument> {
     const newUserArray = await this.userModel.create([createUserDto] , {session});
     const newUser = newUserArray[0];

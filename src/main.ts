@@ -8,6 +8,6 @@ async function bootstrap() {
   app.enableShutdownHooks();
   app.useGlobalPipes(new ValidationPipe());
   app.use(timeout(process.env.TIMEOUT || '15s'));
-  await app.listen(process.env.PORTNUMBER);
+  await app.listen(process.env.PORTNUMBER || 10004);
 }
 bootstrap();
