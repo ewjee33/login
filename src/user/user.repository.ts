@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ClientSession, Model } from 'mongoose';
 import { UserDocument } from './user.schema';
-import { CreateUserDao } from 'src/Dao/createUserDao';
-import { FindUserDao } from 'src/Dao/findUserDao';
-import { UpdateUserDao } from 'src/Dao/updateUserDao';
+import { CreateUserDao } from 'src/user/dao/createUserDao';
+import { FindUserDao } from 'src/user/dao/findUserDao';
+import { UpdateUserDao } from 'src/user/dao/updateUserDao';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -12,9 +12,9 @@ export class UserRepository {
     @InjectModel('User') private readonly userModel: Model<UserDocument>,
   ) {}
   async createUser(createUserDao: CreateUserDao , session : ClientSession ): Promise<UserDocument> {
-    const newUserArray = await this.userModel.create([createUserDao] , {session});
-    const newUser = newUserArray[0];
-    return newUser
+      const newUserArray = await this.userModel.create([createUserDao] , {session});
+      const newUser = newUserArray[0];
+      return newUser
   }
 
   //TODO - need to set {new : true} as default if not given but change it if so
@@ -34,17 +34,18 @@ export class UserRepository {
       return foundUser
   }
 
+  //TODO - limitValue - number = null 
   async findUsers(findUserDao: FindUserDao, projectionOptions: any = null, findOptions: any = null , limitValue: number = null , clientSession : ClientSession): Promise<UserDocument[] | null> {
-    const foundUsers = await this.userModel.find(findUserDao, projectionOptions, findOptions).limit(limitValue);
-    if (!foundUsers) {
-        return null
-    }
-    return foundUsers
+      const foundUsers = await this.userModel.find(findUserDao, projectionOptions, findOptions).limit(limitValue);
+      if (!foundUsers) {
+          return null
+      }
+      return foundUsers
   }
 
-  async deleteUser(findUserDao: FindUserDao , clientSession : ClientSession): Promise<Boolean> {
+  async deleteUser(findUserDao: FindUserDao , session : ClientSession): Promise<Boolean> {
     try {
-      await this.userModel.deleteOne(findUserDao);
+      await this.userModel.deleteOne(findUserDao).session(session);
       return true;
     } catch (error) {
       console.log('Error in deleteUser');

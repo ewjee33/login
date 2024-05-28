@@ -2,7 +2,7 @@ import { Injectable, Scope } from '@nestjs/common';
 import * as mongoose from 'mongoose';
 
 @Injectable({ scope: Scope.REQUEST })
-export class SessionService {
+export class SessionManager {
   session: mongoose.ClientSession;
 
   async startSession(): Promise<mongoose.ClientSession>{
