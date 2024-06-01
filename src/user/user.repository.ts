@@ -35,7 +35,7 @@ export class UserRepository {
   }
 
   //TODO - limitValue - number = null 
-  async findUsers(findUserDao: FindUserDao, projectionOptions: any = null, findOptions: any = null , limitValue: number = null , clientSession : ClientSession): Promise<UserDocument[] | null> {
+  async findUsers(findUserDao: FindUserDao, projectionOptions: any = null, findOptions: any = null , limitValue: number = 0 , clientSession : ClientSession): Promise<UserDocument[] | null> {
       const foundUsers = await this.userModel.find(findUserDao, projectionOptions, findOptions).limit(limitValue);
       if (!foundUsers) {
           return null
