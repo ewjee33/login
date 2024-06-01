@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsDate , IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean } from 'class-validator';
 
 export class CreateUserDao {
   @IsString()
@@ -9,11 +9,15 @@ export class CreateUserDao {
   @IsNotEmpty()
   password: string;
 
-  @IsDate()
+  @IsString()
   @IsNotEmpty()
-  createdAt: Date;
+  consumerId: string;
 
-  @IsDate()
+  @IsString()
   @IsNotEmpty()
-  signedIn: Date;
+  keyId: string;
+
+  @IsBoolean()
+  @IsNotEmpty()
+  isCheater: boolean;
 }

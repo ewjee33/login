@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop({required: true})
   userId: string;
@@ -12,21 +12,12 @@ export class User {
   password: string;
 
   @Prop({required: true})
-  created: Date;
-  
-  @Prop({required: true})
-  signedIn: Date;
-
-  @Prop({required: true})
   consumerId: string;
 
   @Prop({required: true})
   keyId: string;
 
-  @Prop()
+  @Prop({required : true})
   isCheater: boolean;
-
-  @Prop({required: true})
-  deleted: boolean;
 }
 export const UserSchema = SchemaFactory.createForClass(User);

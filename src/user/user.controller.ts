@@ -1,10 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req , Res} from '@nestjs/common';
 import { CreateUserDto } from 'src/user/dto/createUserDto';
 import { FindUserDto } from 'src/user/dto/findUserDto';
 import { UpdateUserDto } from 'src/user/dto/updateUserDto';
 import { DeleteUserDto } from 'src/user/dto/deleteUserDto';
 import { InjectConnection } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import mongoose, { ClientSession } from 'mongoose';
 import { Logger } from 'src/utils/logger';
 import { UserService } from './user.service';
 import { SessionManager } from 'src/utils/sessionManager';
@@ -17,13 +17,15 @@ export class UserController {
         private readonly sessionService: SessionManager , 
         @InjectConnection() private readonly connection: mongoose.Connection,){}
     @Post()
-    async create(@Req() req: Request , @Body() createUserDto: CreateUserDto) : Promise<Response> {
-        const startTime : number = Date.now();
+    async create(@Req() req: Request , @Res() res: Response, @Body() createUserDto: CreateUserDto) : Promise<Response> {
+        const userId = req.headers["userId"] ?? "";
+        const startTime = Date.now();
         const logMessage = [ req.originalUrl , userId ];
-        const session = await this.sessionService.startSession();
-        let shouldCommit = false;
+        const session : ClientSession = await this.sessionService.startSession();
+        let shouldCommit : boolean = false;
         session.startTransaction();
         try {
+            
             return this.logger.logAndSend(req.url, startTime, res, { result: "success", reason: "invalid input" , group : null } , "error" , logMessage)
         } catch (error){
             return this.logger.logAndSend(req.url, startTime, res, { result: "failure", reason: "invalid input" , group : null } , "error" , logMessage)
@@ -39,9 +41,10 @@ export class UserController {
 
     @Get()
     async findAll(@Req() req: Request , @Body() findUserDto: FindUserDto) : Promise<Response> {
-        const startTime : number = Date.now();
+        const userId = req.headers["userId"] ?? "";
+        const startTime = Date.now();
         const logMessage = [ req.originalUrl , userId ];
-        const session = await this.sessionService.startSession();
+        const session : ClientSession = await this.sessionService.startSession();
         let shouldCommit = false;
         session.startTransaction();
         try {
@@ -60,7 +63,8 @@ export class UserController {
 
     @Get(':id')
     async findOne(@Req() req: Request , @Param('id') findUserDto: FindUserDto) : Promise<Response> {
-        const startTime : number = Date.now();
+        const userId = req.headers["userId"] ?? "";
+        const startTime = Date.now();
         const logMessage = [ req.originalUrl , userId ];
         const session = await this.sessionService.startSession();
         let shouldCommit = false;
@@ -81,7 +85,8 @@ export class UserController {
 
     @Put(':id')
     async update(@Req() req: Request ,@Param('id') id : number , @Body() updateUserDto: UpdateUserDto) : Promise<Response> {
-        const startTime : number = Date.now();
+        const userId = req.headers["userId"] ?? "";
+        const startTime = Date.now();
         const logMessage = [ req.originalUrl , userId ];
         const session = await this.sessionService.startSession();
         let shouldCommit = false;
@@ -102,7 +107,8 @@ export class UserController {
 
     @Delete(':id')
     async delete(@Req() req: Request , @Param('id') id : number , @Body() deleteUserDto: DeleteUserDto) : Promise<Response>{
-        const startTime : number = Date.now();
+        const userId = req.headers["userId"] ?? "";
+        const startTime = Date.now();
         const logMessage = [ req.originalUrl , userId ];
         const session = await this.sessionService.startSession();
         let shouldCommit = false;

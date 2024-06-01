@@ -15,7 +15,6 @@ export class Logger {
   private infoLogger : winston.Logger;
   private warnLogger : winston.Logger;
   private errorLogger : winston.Logger;
-  //FIXME : Fix Loggers type
   private Loggers : Loggers;
   private logDir : string;
   private environment: string;
