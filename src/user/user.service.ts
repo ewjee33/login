@@ -6,6 +6,7 @@ import { UserDocument } from './user.schema';
 import { ClientSession } from 'mongoose';
 import { FindUserDao } from './dao/findUserDao';
 import { UpdateUserDao } from './dao/updateUserDao';
+import axios from 'axios';
 
 @Injectable()
 export class UserService {
@@ -59,6 +60,95 @@ export class UserService {
             return deleted;
         } catch (error){
             return false;
+        }
+    }
+
+    async registerConsumer(userId: string): Promise<string> {
+        try {
+            const consumerRegisterUrl = process.env.CONSUMER_REGISTER_URL ?? "API Gateway consumer register address"
+            const newConsumerDetails = {
+                "custom_id": userId
+            }
+            const consumerRegisterResult = await axios.post(consumerRegisterUrl, newConsumerDetails);
+            let consumerId = consumerRegisterResult?.data?.id;
+            if (consumerId) {
+                return consumerId;
+            } else {
+                return "None";
+            }
+        } catch (error) {
+            console.log("error in registerConsumer");
+            console.log(error);
+            return "None";
+        }
+    }
+
+    async deleteOldApiKeys(listOfApiKeys: string[], consumerId: string): Promise<boolean> {
+        try {
+            if (listOfApiKeys.length == 0) {
+                return true;
+            }
+            const deleteApiKeyURL= process.env.DELETE_API_KEY_URL?? "API Gateway api key deletion address";
+            for (let i = 0; i < listOfApiKeys.length; i++) {
+                let deleteApiKeyUrl = deleteApiKeyURL + consumerId + "/key-auth/" + listOfApiKeys[i]["key"];
+                let deleteApiKeyResult = ((await axios.delete(deleteApiKeyUrl)).status == 204);
+                if (deleteApiKeyResult == false) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (error) {
+            console.log("Error in deleteOldApiKeys");
+            console.log(error);
+            return false;
+        }
+    }
+
+    async createNewApiKey(consumerId: string): Promise<string> {
+        try {
+            const keyCreationUrlHead = process.env.KEY_CREATION_URL ?? "API Gateway api key creation address";
+            const keyCreationUrlTail = "/key-auth";
+            const keyCreationUrl = keyCreationUrlHead + consumerId + keyCreationUrlTail;
+            const keyCreationResult = await axios.post(keyCreationUrl);
+            let key = keyCreationResult?.data?.key;
+            if (key) {
+                return key;
+            } else {
+                return "None";
+            }
+        } catch (error) {
+            console.log("Error in createNewApiKey");
+            console.log(error);
+            return "None";
+        }
+    }
+
+    async findConsumerByUserId(userId: string): Promise<string> {
+        try {
+            const consumerDataUrl = process.env.CONSUMER_REGISTER_URL ?? "API Gateway Consumer Retrieve URL";
+            var consumerRegisterUrlWithUsername = consumerDataUrl + "?custom_id=" + userId;
+            const consumerData = await axios.get(consumerRegisterUrlWithUsername);
+            let consumerId = consumerData?.data?.data?.[0]?.id;
+            if (consumerId) {
+                return consumerId;
+            } else {
+                return "None";
+            }
+        } catch (error) {
+            console.log("error in getConsumerByUserId");
+            console.log(error);
+            return "None";
+        }
+    }
+
+    async findKeysByConsumerId(consumerId: string): Promise<string[]> {
+        try {
+            const consumerURLHead = process.env.API_KEY_URL_HEAD ?? "API Gateway API Keys Retrieval URL"
+            const consumerData = await axios.get(consumerURLHead + consumerId + "/key-auth")
+            return consumerData?.data?.data
+        } catch (error) {
+            console.log("Registering New Consumer for user without one")
+            return []
         }
     }
 

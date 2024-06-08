@@ -9,6 +9,9 @@ export class User {
   userId: string;
 
   @Prop({required: true})
+  consumerId: string;
+
+  @Prop({required: true})
   password: string;
 }
 export const UserSchema = SchemaFactory.createForClass(User);
