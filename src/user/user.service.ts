@@ -65,7 +65,7 @@ export class UserService {
 
     async registerConsumer(userId: string): Promise<string> {
         try {
-            const consumerRegisterUrl = process.env.CONSUMER_REGISTER_URL ?? "API Gateway consumer register address"
+            const consumerRegisterUrl = process.env.CONSUMER_URL ?? "API Gateway consumer register address"
             const newConsumerDetails = {
                 "custom_id": userId
             }
@@ -88,7 +88,7 @@ export class UserService {
             if (listOfApiKeys.length == 0) {
                 return true;
             }
-            const deleteApiKeyURL= process.env.DELETE_API_KEY_URL?? "API Gateway api key deletion address";
+            const deleteApiKeyURL= process.env.KEY_URL?? "API Gateway api key deletion address";
             for (let i = 0; i < listOfApiKeys.length; i++) {
                 let deleteApiKeyUrl = deleteApiKeyURL + consumerId + "/key-auth/" + listOfApiKeys[i]["key"];
                 let deleteApiKeyResult = ((await axios.delete(deleteApiKeyUrl)).status == 204);
@@ -106,7 +106,7 @@ export class UserService {
 
     async createNewApiKey(consumerId: string): Promise<string> {
         try {
-            const keyCreationUrlHead = process.env.KEY_CREATION_URL ?? "API Gateway api key creation address";
+            const keyCreationUrlHead = process.env.KEY_URL ?? "API Gateway api key creation address";
             const keyCreationUrlTail = "/key-auth";
             const keyCreationUrl = keyCreationUrlHead + consumerId + keyCreationUrlTail;
             const keyCreationResult = await axios.post(keyCreationUrl);
@@ -125,7 +125,7 @@ export class UserService {
 
     async findConsumerByUserId(userId: string): Promise<string> {
         try {
-            const consumerDataUrl = process.env.CONSUMER_REGISTER_URL ?? "API Gateway Consumer Retrieve URL";
+            const consumerDataUrl = process.env.CONSUMER_URL ?? "API Gateway Consumer Retrieve URL";
             var consumerRegisterUrlWithUsername = consumerDataUrl + "?custom_id=" + userId;
             const consumerData = await axios.get(consumerRegisterUrlWithUsername);
             let consumerId = consumerData?.data?.data?.[0]?.id;
@@ -143,7 +143,7 @@ export class UserService {
 
     async findKeysByConsumerId(consumerId: string): Promise<string[]> {
         try {
-            const consumerURLHead = process.env.API_KEY_URL_HEAD ?? "API Gateway API Keys Retrieval URL"
+            const consumerURLHead = process.env.CONSUMER_URL ?? "API Gateway API Keys Retrieval URL"
             const consumerData = await axios.get(consumerURLHead + consumerId + "/key-auth")
             return consumerData?.data?.data
         } catch (error) {
