@@ -5,6 +5,7 @@ import { CreateUserDao } from 'src/user/dao/createUserDao';
 import { FindUserDao } from 'src/user/dao/findUserDao';
 import { UpdateUserDao } from 'src/user/dao/updateUserDao';
 import { InjectModel } from '@nestjs/mongoose';
+import { resourceLimits } from 'worker_threads';
 
 @Injectable()
 export class UserRepository {
@@ -34,19 +35,22 @@ export class UserRepository {
       return foundUser
   }
 
-  //TODO - limitValue - number = null 
-  async findUsers(findUserDao: FindUserDao, projectionOptions: any = null, findOptions: any = null , limitValue: number = 0 , clientSession : ClientSession): Promise<UserDocument[] | null> {
-      const foundUsers = await this.userModel.find(findUserDao, projectionOptions, findOptions).limit(limitValue);
+  async findUsers(findUserDao: FindUserDao, session : ClientSession , projectionOptions: any = null, findOptions: any = null , limitValue: number = 0): Promise<UserDocument[] | null> {
+      const foundUsers = await this.userModel.find(findUserDao, projectionOptions, findOptions).limit(limitValue).session(session);
       if (!foundUsers) {
           return null
       }
       return foundUsers
   }
 
-  async deleteUser(findUserDao: FindUserDao , session : ClientSession): Promise<Boolean> {
+  async deleteUser(findUserDao: FindUserDao , session : ClientSession): Promise<boolean> {
     try {
-      await this.userModel.deleteOne(findUserDao).session(session);
-      return true;
+      const deleteResult = await this.userModel.deleteOne(findUserDao).session(session);
+      if (deleteResult.acknowledged && deleteResult.deletedCount === 1){
+        return true;
+      } else {
+        return false;
+      }
     } catch (error) {
       console.log('Error in deleteUser');
       console.log(error);
