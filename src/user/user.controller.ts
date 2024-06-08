@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req , Res} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req , Res, UseInterceptors} from '@nestjs/common';
 import { CreateUserDto } from 'src/user/dto/createUserDto';
 import { FindUserDto } from 'src/user/dto/findUserDto';
 import { UpdateUserDto } from 'src/user/dto/updateUserDto';
@@ -14,6 +14,7 @@ import { UserDocument } from './user.schema';
 import { FindUserDao } from './dao/findUserDao';
 import { UpdateUserDao } from './dao/updateUserDao';
 import { LoginUserDto } from './dto/loginUserDto';
+import { CustomCacheInterceptor } from 'src/utils/customInterceptor';
 
 @Controller('user')
 export class UserController {
@@ -24,6 +25,7 @@ export class UserController {
         ){}
 
     @Post()
+    @UseInterceptors(new CustomCacheInterceptor('public, max-age=0'))
     async create(@Req() req: Request , @Res() res: Response, @Body() createUserDto: CreateUserDto) : Promise<Response> {
         const startTime = Date.now();
         const logMessage = [ req.originalUrl ];
@@ -53,6 +55,7 @@ export class UserController {
     }
 
     @Post('/apikey')
+    @UseInterceptors(new CustomCacheInterceptor('public, max-age=0'))
     async login(@Req() req: Request , @Res() res: Response, @Body() loginUserDto: LoginUserDto) : Promise<Response> {
         const startTime = Date.now();
         const logMessage = [ req.originalUrl ];
@@ -117,6 +120,7 @@ export class UserController {
     }
 
     @Put(':id/password')
+    @UseInterceptors(new CustomCacheInterceptor('public, max-age=0'))
     async update(@Req() req: Request , @Res() res: Response , @Param('id') id : string , @Body() updateUserDto: UpdateUserDto) : Promise<Response> {
         const userId = req.headers["userId"] ?? "";
         const startTime = Date.now();
@@ -141,11 +145,12 @@ export class UserController {
                 } else {
                 await session.abortTransaction();
                 }
-            session.endSession();
+            await session.endSession();
         }
     }
 
     @Delete(':id')
+    @UseInterceptors(new CustomCacheInterceptor('public, max-age=0'))
     async delete(@Req() req: Request , @Res() res: Response , @Param('id') id : string) : Promise<Response>{
         const userId = req.headers["userId"] ?? "";
         const startTime = Date.now();
@@ -169,7 +174,7 @@ export class UserController {
                 } else {
                 await session.abortTransaction();
                 }
-            session.endSession();
+            await session.endSession();
         }
     }
 }
