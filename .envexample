@@ -1,3 +1,5 @@
 PORTNUMBER=PortNumberToUse
 TZ=TimeZoneToUse
 DB_URL=DBAddress
+CONSUMER_URL=http://dev-kong.bitmango.com:8001/consumers
+KEY_URL=http://dev-kong.bitmango.com:8001/key-auths/

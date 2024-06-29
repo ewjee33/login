@@ -9,15 +9,4 @@ export class CreateUserDto {
   @IsNotEmpty()
   password: string;
 
-  @IsString()
-  @IsNotEmpty()
-  consumerId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  keyId: string;
-
-  @IsBoolean()
-  @IsNotEmpty()
-  isCheater: boolean;
 }

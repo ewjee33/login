@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Req , Res, UseIntercep
 import { CreateUserDto } from 'src/user/dto/createUserDto';
 import { FindUserDto } from 'src/user/dto/findUserDto';
 import { UpdateUserDto } from 'src/user/dto/updateUserDto';
-import { DeleteUserDto } from 'src/user/dto/deleteUserDto';
 import { InjectConnection } from '@nestjs/mongoose';
 import mongoose, { ClientSession } from 'mongoose';
 import { Logger } from 'src/utils/logger';
@@ -83,14 +82,14 @@ export class UserController {
                 if(consumerId == "None"){
                     const newConsumerId = await this.userService.registerConsumer(userId) 
                     if (newConsumerId == "None") { 
-                        return this.logger.logAndSend(req.url , startTime , res , {result : "failure" , reason : "error in Login" , userId: "" , password: "", session: ""} 
+                        return this.logger.logAndSend(req.url , startTime , res , {result : "failure" , reason : "error in Login" , userId: "" , password: "", apikey: ""} 
                         , "error" , logMessage)
                     } 
           
-                    //Getting Session Key from Kong 
+                    //Getting apikey Key from Kong 
                     const newApiKey = await this.userService.createNewApiKey(newConsumerId) 
                     if (newApiKey == "None") { 
-                        return this.logger.logAndSend(req.url , startTime , res , {result : "failure" , reason : "error in Login" , userId : "", password : "", session : ""}
+                        return this.logger.logAndSend(req.url , startTime , res , {result : "failure" , reason : "error in Login" , userId : "", password : "", apikey : ""}
                         , "error" ,  logMessage)
                     }
           
@@ -98,18 +97,18 @@ export class UserController {
                     const createUserDto = {userId : userId , password : password , created : now , signedIn : now , keyId : newApiKey , consumerId : newConsumerId , deleted : false}
                     await this.userService.createUser(createUserDto , session)
                     shouldCommit = true;
-                    return this.logger.logAndSend(req.url , startTime , res , {result : "success" , reason : "", session: newApiKey}, "info" , logMessage)
-                  }
+                    return this.logger.logAndSend(req.url , startTime , res , {result : "success" , reason : "", apikey: newApiKey}, "info" , logMessage)
+                }
                 const oldKeys : string[] = await this.userService.findKeysByConsumerId(consumerId)
                 const deleteOldApiKeysResult : boolean = await this.userService.deleteOldApiKeys(oldKeys , consumerId)
                 if (deleteOldApiKeysResult == false) { 
-                    return this.logger.logAndSend(req.url , startTime , res , {result : "failure" , reason : "Deleting Old API Key failed" , session: ""} , "error" ,  logMessage)
+                    return this.logger.logAndSend(req.url , startTime , res , {result : "failure" , reason : "Deleting Old API Key failed" , apikey: ""} , "error" ,  logMessage)
                 }
                 
                 //Finally create a new api key to be used 
                 const newApiKey : string = await this.userService.createNewApiKey(consumerId) 
                 if (newApiKey == "None") { 
-                    return this.logger.logAndSend(req.url , startTime , res , {result : "failure" , reason : "Creating New API Key failed" , session: ""}
+                    return this.logger.logAndSend(req.url , startTime , res , {result : "failure" , reason : "Creating New API Key failed" , apikey: ""}
                     , "error" ,  logMessage)
                 }
                 return this.logger.logAndSend(req.url, startTime, res, { result: "success", reason: "" , apikey : "apikey" } , "info" , logMessage)    
@@ -174,6 +173,10 @@ export class UserController {
         session.startTransaction();
         try {
             const findUserDao : FindUserDao = {_id : id};
+            const foundUser = await this.userService.findUser(findUserDao , session);
+            if (! foundUser){
+                return this.logger.logAndSend(req.url, startTime, res, { result: "failure", reason: "user not found" , user : null } , "error" , logMessage)    
+            }
             const updateUserDao : UpdateUserDao = updateUserDto;
             const updatedUser : UserDocument | null = await this.userService.updateUser(findUserDao , updateUserDao , session);
             if (updatedUser){
