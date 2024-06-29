@@ -5,7 +5,6 @@ import { CreateUserDao } from 'src/user/dao/createUserDao';
 import { FindUserDao } from 'src/user/dao/findUserDao';
 import { UpdateUserDao } from 'src/user/dao/updateUserDao';
 import { InjectModel } from '@nestjs/mongoose';
-import { resourceLimits } from 'worker_threads';
 
 @Injectable()
 export class UserRepository {

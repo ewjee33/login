@@ -9,4 +9,8 @@ export class CreateUserDao {
   @IsNotEmpty()
   password: string;
 
+  @IsString()
+  @IsNotEmpty()
+  consumerId : string;
+
 }
